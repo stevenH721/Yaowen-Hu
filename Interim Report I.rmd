@@ -67,7 +67,50 @@ theme_bw()
 
 6. Create bivariate frequency distributions (tables or plots) for key variables
 ```{r}
+# Bivariate frequency distribution for ethnicity
+homeMortgageEthnicity2 = homeMortgage %>% group_by(action_taken_name,applicant_ethnicity_name) %>%
+summarise(CountOfActionTaken = n()) 
+homeMortgageEthnicity = homeMortgage %>% group_by(applicant_ethnicity_name) %>%
+summarise(CountOfEthnicity = n()) 
 
+homeMortgageEthnicity3 = inner_join(homeMortgageEthnicity,homeMortgageEthnicity2) %>%
+mutate(percentage = (CountOfActionTaken/CountOfEthnicity) * 100 ) 
+
+homeMortgageEthnicity3 %>%
+  ggplot(aes(x = reorder(action_taken_name, percentage), 
+                               y = percentage)) +
+  geom_bar(stat='identity',colour="white", fill ="yellow") +
+  facet_wrap(~ applicant_ethnicity_name) +
+  geom_text(aes(x = action_taken_name, y = 1, label = paste0("(",round(percentage),"%)",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'action_taken_name', y = '%age Count Of Action Taken', title = 'Actions in Loans') +
+  coord_flip() + 
+  theme_bw()
+
+```
+
+```{r}
+# Bivariate frequency distribution for gender
+homeMortgageGender2 = homeMortgage %>% group_by(action_taken_name,applicant_sex_name) %>%
+summarise(CountOfActionTaken = n()) 
+homeMortgageGender = homeMortgage %>% group_by(applicant_sex_name) %>%
+summarise(CountOfSex = n()) 
+
+homeMortgageGender3 = inner_join(homeMortgageGender,homeMortgageGender2) %>%
+mutate(percentage = (CountOfActionTaken/CountOfSex) * 100 ) 
+
+homeMortgageGender3 %>%
+  ggplot(aes(x = reorder(action_taken_name, percentage), 
+                               y = percentage)) +
+  geom_bar(stat='identity',colour="white", fill ="yellow") +
+  facet_wrap(~ applicant_sex_name) +
+  geom_text(aes(x = action_taken_name, y = 1, label = paste0("(",round(percentage),"%)",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'action_taken_name', y = '%age Count Of Action Taken', title = 'Actions in Loans') +
+  coord_flip() + 
+  theme_bw()
 ```
 
 7. Discuss what the data patterns indicate, and what this could mean for the probability of
