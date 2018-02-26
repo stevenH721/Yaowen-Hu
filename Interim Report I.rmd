@@ -82,6 +82,22 @@ names(hmdacon.df) <- c("mean","mode","standard deviation","median","range")
 
 5. Provide histograms/density plots for key variables, such as action taken on loan, gender, ethnicity, etc.
 ```{r}
+Install.packages("tidyverse")
+
+Install.packages("rpart")
+Install.packages("rpart.plot")
+Install.packages("caTools")
+Install.packages("caret")
+Install.packages("DT")
+
+library(tidyverse)
+library(rpart)
+library(rpart.plot)
+library(caTools)
+library(caret)
+library(DT)
+
+rm(list=ls())
 # Histogram for action taken on loan
 homeMortgageStatus = homeMortgage %>% group_by(action_taken_name) %>%
 summarise(CountOfActionTaken = n()) %>%
