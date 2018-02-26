@@ -6,6 +6,7 @@ output: word_document
 1. What is the data problem? What is the final managerial objective?
 
 
+
 2. Describe the measurement types of each variable
 
 
