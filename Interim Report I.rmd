@@ -1,14 +1,15 @@
 The URL for our Team GitHub repository is https://github.com/stevenH721/Yaowen-Hu.git
 The URL to the Kernel and Kaggle dataset is https://www.kaggle.com/jboysen/ny-home-mortgage
-title: "Interim Report I"
-output: word_document
+Title: Interim Report I
+Author: Yaowen Hu, Qingqing Cai, Yumei Xiong, Yu Shi
 ---
 1. What is the data problem? What is the final managerial objective?
 # To begin with, some of the column names are not clear enough. For example, the "applicant_date_indicator" is confusing. 
 # Secondly, there are too much missing data, leaving a lot of blank space in the data, which seems abundant.
 #Thirdly, the data set is seriously biased. The sample contains 283335 white applicants, but only 27890 asian applicants, indicating that the sample is not randomly selected.   
 
-# managerial objective: The bank would like to provide loans to the applicants that are in a good financial status, thus are least likely to default.
+# Managerial objective: The bank would like to provide loans to the applicants that are in a good financial status, thus are least likely to default.
+
 
 2. Describe the measurement types of each variable
  #Based on our observation and result from str function, we conclue the measurement types as follow.
@@ -19,6 +20,7 @@ Ordinal: as_of_year
 Interval: action_taken; agency_code; applicant_ethicity; applicant_race_1&2&3&4&5; applicant_sex; applicantion_date_indicatior; census_tract_number; co_applicant_ethnicity; co_applicant_race_1&2&3&4&5; co_applicant_sex; country_code; denial_reason_1&2&3; edit_status; hoepa_status; lien_status; loan_purpose; loan_type; msamd; owner_occupancy; preapproval; property_type; purchaser_type; sequence_number; state_code
 
 Ratio: hud_median_family_income; loan_amount_000s; number_of_1_to_4_family_units; number_of_owner_occupied_units; minority_population; population; tate_spread; tract_to_msamd_income
+
 
 3. Create a table summarizing the range or variation in each variable. Add statistics (mean,
 median, standard deviation, etc.) as you deem necessary.
@@ -74,11 +76,13 @@ for(n in c(1:43)){
 names(hmdacon.df) <- c("mean","mode","standard deviation","median","range")
 ```
 
+
 4. How do you handle missing data in this dataset?
 # Firstly, we need to decide whether the missing data is missing at random. For instance, applicants with lower income may not be willing to reveal their income level. 
 ## If the data is missing at random, we could simply remove the missing data sample since we have huge amount of observations. There are 2 types of deletion: listwise, 
 # Listwise deletion (complete-case analysis) removes all data for an observation if there is one or more missing values. For example, in this dataset, most spaces in colomn V43 in blank, so we could delete this column for simplicity. Pairwise deletion analyses all cases in which the variables of interest are present and thus maximizes all data available by an analysis basis.
 # If the data is missing not at random, we could replace missing data with substituted values. For instance, one of the choices is to replace the missing data with the mean of the data we have. Using this method, we could avoid circumstances such as default listwise deletion. 
+
 
 5. Provide histograms/density plots for key variables, such as action taken on loan, gender, ethnicity, etc.
 ```{r}
@@ -148,6 +152,7 @@ theme_bw()
 hist(homeMortgage$applicant_income_000s,main="Histogram of income",n=100,xlab="Applicant's income in thousands",ylab="Count",col="yellow",xlim=c(0,1500))
 ```
 
+
 6. Create bivariate frequency distributions (tables or plots) for key variables
 ```{r}
 # Bivariate frequency distribution for ethnicity
@@ -205,6 +210,7 @@ ggplot(aes(applicant_income_000s)) +
   geom_histogram(fill = c("yellow")) +
   labs(x = 'Income in Thousands', y = 'Count', title = 'Applicant Income distribution for loan action taken') +  theme_bw()+facet_wrap(~action_taken_name)
 ```
+
 
 7. Discuss what the data patterns indicate, and what this could mean for the probability of
 getting a loan approved.
