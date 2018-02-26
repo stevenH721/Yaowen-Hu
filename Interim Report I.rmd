@@ -142,8 +142,42 @@ ggplot(aes(applicant_income_000s)) +
 7. Discuss what the data patterns indicate, and what this could mean for the probability of
 getting a loan approved.
 ```{r}
+selectedCols = c("action_taken","applicant_ethnicity",        
+"applicant_income_000s","applicant_race_1","co_applicant_ethnicity",
+"co_applicant_sex", "county_code","hoepa_status","lien_status",
+"loan_purpose","loan_type","msamd",                                              
+"owner_occupancy","preapproval",
+"property_type","purchaser_type","loan_amount_000s")
 
-```
+homeMortgage_selectedCols = homeMortgage %>% select(selectedCols) %>%
+  mutate(isLoanOriginated = FALSE)  %>%
+  mutate(isLoanOriginated = replace(isLoanOriginated, action_taken == 1, TRUE)) %>%
+  select(-action_taken)
+
+homeMortgage_selectedCols$applicant_ethnicity = as.factor(homeMortgage_selectedCols$applicant_ethnicity)
+homeMortgage_selectedCols$applicant_race_1 = as.factor(homeMortgage_selectedCols$applicant_ethnicity)
+homeMortgage_selectedCols$co_applicant_ethnicity = as.factor(homeMortgage_selectedCols$co_applicant_ethnicity)
+homeMortgage_selectedCols$co_applicant_sex = as.factor(homeMortgage_selectedCols$co_applicant_sex)
+homeMortgage_selectedCols$county_code = as.factor(homeMortgage_selectedCols$county_code)
+homeMortgage_selectedCols$hoepa_status =  as.factor(homeMortgage_selectedCols$hoepa_status)
+homeMortgage_selectedCols$lien_status =  as.factor(homeMortgage_selectedCols$lien_status)
+homeMortgage_selectedCols$loan_purpose =  as.factor(homeMortgage_selectedCols$loan_purpose)
+homeMortgage_selectedCols$loan_type =  as.factor(homeMortgage_selectedCols$loan_type)
+homeMortgage_selectedCols$owner_occupancy =  as.factor(homeMortgage_selectedCols$owner_occupancy)  
+homeMortgage_selectedCols$preapproval =  as.factor(homeMortgage_selectedCols$preapproval)  
+homeMortgage_selectedCols$property_type =  as.factor(homeMortgage_selectedCols$property_type) 
+homeMortgage_selectedCols$purchaser_type =  as.factor(homeMortgage_selectedCols$purchaser_type)
+
+set.seed(3000)
+split = sample.split(homeMortgage_selectedCols$isLoanOriginated, SplitRatio = 0.7)
+Train = subset(homeMortgage_selectedCols, split==TRUE)
+Test = subset(homeMortgage_selectedCols, split==FALSE)
+   
+# CART model
+homeMortgageTree = rpart(isLoanOriginated ~ ., method="class", data = Train, control=rpart.control(minbucket=5))
+
+prp(homeMortgageTree)
+# We randomly selected 3000 samples and set the training set/ test set ratio to be 0.7. According to the result, for instance, loan could be approved if lien_stats is not 4 and purchase is not zaro, loan_pur=3, loan_typ =2,3,4, county_c= 1,5,7,...119 and loan_amo < 418, which is the most complex case. It can also be approved when lien_stats is not 4 and purchase is zero. Therefore, lien_sts is the most important term and purchse is the secondly one. Loan_pur ,loan_typ, county_c and loan_amo are listed in order of importance.
 
 
 
