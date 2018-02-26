@@ -82,13 +82,13 @@ names(hmdacon.df) <- c("mean","mode","standard deviation","median","range")
 
 5. Provide histograms/density plots for key variables, such as action taken on loan, gender, ethnicity, etc.
 ```{r}
-Install.packages("tidyverse")
+install.packages("tidyverse")
 
-Install.packages("rpart")
-Install.packages("rpart.plot")
-Install.packages("caTools")
-Install.packages("caret")
-Install.packages("DT")
+install.packages("rpart")
+install.packages("rpart.plot")
+install.packages("caTools")
+install.packages("caret")
+install.packages("DT")
 
 library(tidyverse)
 library(rpart)
@@ -99,16 +99,16 @@ library(DT)
 
 rm(list=ls())
 # Histogram for action taken on loan
+homeMortgage=read.csv("ny_hmda_2015.csv")
 homeMortgageStatus = homeMortgage %>% group_by(action_taken_name) %>%
-summarise(CountOfActionTaken = n()) %>%
-arrange(desc(CountOfActionTaken))
-
-ggplot(homeMortgageStatus, aes(x = reorder(action_taken_name, CountOfActionTaken), y = CountOfActionTaken)) +
+summarise(CountOfActionTaken = n()) 
+homeMortgageStatus %>%
+ggplot(aes(x = action_taken_name, y = CountOfActionTaken)) +
 geom_bar(stat='identity',colour="white", fill ="yellow") +
-geom_text(aes(x = action_taken_name, y=1,sep="",label=paste0(CountOfActionTaken)),
+geom_text(aes(x = action_taken_name, y=1,label=paste0(CountOfActionTaken)),
             hjust=0, vjust=.5, size = 4, colour = 'black',
             fontface = 'bold') +
-labs(x = 'action_taken_name', y = 'Count Of Action Taken', title = 'Actions in Loans') +
+labs(x = 'action_taken_name', y = 'Count Of Action Taken', title = 'Histogram for action taken on loan') +
 coord_flip() + 
 theme_bw()
 ```
@@ -116,15 +116,14 @@ theme_bw()
 ```{r}
 # Histogram for gender
 homeMortgageGender = homeMortgage %>% group_by(applicant_sex_name) %>%
-summarise(CountOfSex = n()) %>%
-arrange(desc(CountOfSex))
-
-ggplot(homeMortgageGender, aes(x = reorder(applicant_sex_name, CountOfSex), y = CountOfSex)) +
+summarise(CountOfActionTaken = n()) 
+homeMortgageGender %>%
+ggplot(aes(x = applicant_sex_name, y = CountOfActionTaken)) +
 geom_bar(stat='identity',colour="white", fill ="yellow") +
-geom_text(aes(x = applicant_sex_name, y=1,sep="",label=paste0(CountOfSex)),
+geom_text(aes(x = applicant_sex_name, y=1,label=paste0(CountOfActionTaken)),
             hjust=0, vjust=.5, size = 4, colour = 'black',
             fontface = 'bold') +
-labs(x = 'Gender', y = 'Count', title = 'Histogram for Gender') +
+labs(x = 'Gender', y = 'Count Of Action Taken', title = 'Histogram for gender') +
 coord_flip() + 
 theme_bw()
 ```
@@ -132,15 +131,14 @@ theme_bw()
 ```{r}
 # Histogram for ethnicity
 homeMortgageEthnicity = homeMortgage %>% group_by(applicant_ethnicity_name) %>%
-summarise(CountOfEthnicity = n()) %>%
-arrange(desc(CountOfEthnicity))
-
-ggplot(homeMortgageEthnicity, aes(x = reorder(applicant_ethnicity_name, CountOfEthnicity), y = CountOfEthnicity)) +
+summarise(CountOfActionTaken = n()) 
+homeMortgageEthnicity %>%
+ggplot(aes(x = applicant_ethnicity_name, y = CountOfActionTaken)) +
 geom_bar(stat='identity',colour="white", fill ="yellow") +
-geom_text(aes(x = applicant_ethnicity_name, y=1,sep="",label=paste0(CountOfEthnicity)),
+geom_text(aes(x = applicant_ethnicity_name, y=1,label=paste0(CountOfActionTaken)),
             hjust=0, vjust=.5, size = 4, colour = 'black',
             fontface = 'bold') +
-labs(x = 'Ethinicity', y = 'Count', title = 'Histogram for Ethnicity') +
+labs(x = 'Ethnicity', y = 'Count Of Action Taken', title = 'Histogram for ethnicity') +
 coord_flip() + 
 theme_bw()
 ```
@@ -200,14 +198,12 @@ homeMortgageGender3 %>%
 
 ```{r}
 # Bivariate frequency distribution for applicant's income
-breaks = seq(0,400,50)
-
 homeMortgage %>%
   
 ggplot(aes(applicant_income_000s)) +
-  scale_x_continuous(limits = c(0, 400),breaks=breaks ) +
-  geom_histogram(binwidth = 10,,fill = c("yellow")) +
-  labs(x = 'Income in Thousands', y = 'Count', title = 'Loan Originated Applicant Income distribution') +  theme_bw()+facet_wrap(~action_taken_name)
+  scale_x_continuous(limits = c(0, 400)) +
+  geom_histogram(fill = c("yellow")) +
+  labs(x = 'Income in Thousands', y = 'Count', title = 'Applicant Income distribution for loan action taken') +  theme_bw()+facet_wrap(~action_taken_name)
 ```
 
 7. Discuss what the data patterns indicate, and what this could mean for the probability of
@@ -249,6 +245,7 @@ homeMortgageTree = rpart(isLoanOriginated ~ ., method="class", data = Train, con
 
 prp(homeMortgageTree)
 # We randomly selected 3000 samples and set the training set/ test set ratio to be 0.7. According to the result, for instance, loan could be approved if lien_stats is not 4 and purchase is not zaro, loan_pur=3, loan_typ =2,3,4, county_c= 1,5,7,...119 and loan_amo < 418, which is the most complex case. It can also be approved when lien_stats is not 4 and purchase is zero. Therefore, lien_sts is the most important term and purchse is the secondly one. Loan_pur ,loan_typ, county_c and loan_amo are listed in order of importance.
+# Also, from previous graphs, we can see that people who are not Hispanic or Latino are most likely to get loan originated. While gender affects little on whether loan will be originated, with male accounting for 58% and female accounting for 57%.
 
 
 
