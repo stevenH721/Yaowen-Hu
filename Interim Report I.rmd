@@ -16,10 +16,53 @@ median, standard deviation, etc.) as you deem necessary.
 
 ```
 4. How do you handle missing data in this dataset?
-5. Provide histograms/density plots for key variables, such as action taken on loan, gender,
-ethnicity, etc.
+5. Provide histograms/density plots for key variables, such as action taken on loan, gender, ethnicity, etc.
 ```{r}
+# Histogram for action taken on loan
+homeMortgageStatus = homeMortgage %>% group_by(action_taken_name) %>%
+summarise(CountOfActionTaken = n()) %>%
+arrange(desc(CountOfActionTaken))
 
+ggplot(homeMortgageStatus, aes(x = reorder(action_taken_name, CountOfActionTaken), y = CountOfActionTaken)) +
+geom_bar(stat='identity',colour="white", fill ="yellow") +
+geom_text(aes(x = action_taken_name, y=1,sep="",label=paste0(CountOfActionTaken)),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+labs(x = 'action_taken_name', y = 'Count Of Action Taken', title = 'Actions in Loans') +
+coord_flip() + 
+theme_bw()
+```
+
+```{r}
+# Histogram for gender
+homeMortgageGender = homeMortgage %>% group_by(applicant_sex_name) %>%
+summarise(CountOfSex = n()) %>%
+arrange(desc(CountOfSex))
+
+ggplot(homeMortgageGender, aes(x = reorder(applicant_sex_name, CountOfSex), y = CountOfSex)) +
+geom_bar(stat='identity',colour="white", fill ="yellow") +
+geom_text(aes(x = applicant_sex_name, y=1,sep="",label=paste0(CountOfSex)),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+labs(x = 'Gender', y = 'Count', title = 'Histogram for Gender') +
+coord_flip() + 
+theme_bw()
+```
+
+```{r}
+# Histogram for ethnicity
+homeMortgageEthnicity = homeMortgage %>% group_by(applicant_ethnicity_name) %>%
+summarise(CountOfEthnicity = n()) %>%
+arrange(desc(CountOfEthnicity))
+
+ggplot(homeMortgageEthnicity, aes(x = reorder(applicant_ethnicity_name, CountOfEthnicity), y = CountOfEthnicity)) +
+geom_bar(stat='identity',colour="white", fill ="yellow") +
+geom_text(aes(x = applicant_ethnicity_name, y=1,sep="",label=paste0(CountOfEthnicity)),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+labs(x = 'Ethinicity', y = 'Count', title = 'Histogram for Ethnicity') +
+coord_flip() + 
+theme_bw()
 ```
 
 6. Create bivariate frequency distributions (tables or plots) for key variables
