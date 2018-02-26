@@ -65,6 +65,11 @@ coord_flip() +
 theme_bw()
 ```
 
+```{r}
+# Histogram for applicant's income
+hist(homeMortgage$applicant_income_000s,main="Histogram of income",n=100,xlab="Applicant's income in thousands",ylab="Count",col="yellow",xlim=c(0,1500))
+```
+
 6. Create bivariate frequency distributions (tables or plots) for key variables
 ```{r}
 # Bivariate frequency distribution for ethnicity
@@ -111,6 +116,18 @@ homeMortgageGender3 %>%
   labs(x = 'action_taken_name', y = '%age Count Of Action Taken', title = 'Actions in Loans') +
   coord_flip() + 
   theme_bw()
+```
+
+```{r}
+# Bivariate frequency distribution for applicant's income
+breaks = seq(0,400,50)
+
+homeMortgage %>%
+  
+ggplot(aes(applicant_income_000s)) +
+  scale_x_continuous(limits = c(0, 400),breaks=breaks ) +
+  geom_histogram(binwidth = 10,,fill = c("yellow")) +
+  labs(x = 'Income in Thousands', y = 'Count', title = 'Loan Originated Applicant Income distribution') +  theme_bw()+facet_wrap(~action_taken_name)
 ```
 
 7. Discuss what the data patterns indicate, and what this could mean for the probability of
