@@ -1,31 +1,96 @@
+---
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
 The URL for our Team GitHub repository is https://github.com/stevenH721/Yaowen-Hu.git
 The URL to the Kernel and Kaggle dataset is https://www.kaggle.com/jboysen/ny-home-mortgage
-title: "Interim Report I"
-output: word_document
+Title: Interim Report I
+Author: Yaowen Hu, Qingqing Cai, Yumei Xiong, Yu Shi
 ---
 1. What is the data problem? What is the final managerial objective?
 # To begin with, some of the column names are not clear enough. For example, the "applicant_date_indicator" is confusing. 
 # Secondly, there are too much missing data, leaving a lot of blank space in the data, which seems abundant.
 #Thirdly, the data set is seriously biased. The sample contains 283335 white applicants, but only 27890 asian applicants, indicating that the sample is not randomly selected.   
 
-# managerial objective: The bank would like to provide loans to the applicants that are in a good financial status, thus are least likely to default.
+# Managerial objective: The bank would like to provide loans to the applicants that are in a good financial status, thus are least likely to default.
 
- 
 
 2. Describe the measurement types of each variable
- 
+ #Based on our observation and result from str function, we conclue the measurement types as follow.
+Nominal: action_taken_name; agency_abbr; agency_name; applicant_ethnicity_name; applicant_race_name_1&2&3&4&5; applicant_sex_name; co_applicant_sex_name; country_name; denial_reason_name_1&2&3; edit_status_name; hoepa_status_name; lien_status_name; loan_purpose_name; msamd_name; owner_occupancy_name; preapproval_name; property_type_name; state_abbr; respondent_id
+
+Ordinal: as_of_year
+
+Interval: action_taken; agency_code; applicant_ethicity; applicant_race_1&2&3&4&5; applicant_sex; applicantion_date_indicatior; census_tract_number; co_applicant_ethnicity; co_applicant_race_1&2&3&4&5; co_applicant_sex; country_code; denial_reason_1&2&3; edit_status; hoepa_status; lien_status; loan_purpose; loan_type; msamd; owner_occupancy; preapproval; property_type; purchaser_type; sequence_number; state_code
+
+Ratio: hud_median_family_income; loan_amount_000s; number_of_1_to_4_family_units; number_of_owner_occupied_units; minority_population; population; tate_spread; tract_to_msamd_income
+
 
 3. Create a table summarizing the range or variation in each variable. Add statistics (mean,
 median, standard deviation, etc.) as you deem necessary.
 ```{r}
+library(dplyr)
 
+homeMortgage=read.csv("ny_hmda_2015.csv")
+## summary table for discrete variables
+hmdadisc <- homeMortgage %>%
+  select(action_taken_name,agency_abbr,agency_name,applicant_ethnicity_name, applicant_race_name_1, applicant_race_name_2, applicant_race_name_3, applicant_race_name_4, applicant_race_name_5, applicant_sex_name, co_applicant_sex_name, county_name, denial_reason_name_1, denial_reason_name_2, denial_reason_name_3, edit_status_name, hoepa_status_name, lien_status_name, loan_purpose_name, msamd_name, owner_occupancy_name, preapproval_name, property_type_name, state_abbr)
+summary(hmdadisc)
+
+## summary table for continuous variables
+hmdacon.df <- data.frame(matrix(NA, nrow = 43, ncol = 5))
+hmdacon <- homeMortgage%>%
+  select(action_taken, agency_code, applicant_ethnicity, applicant_income_000s, applicant_race_1, applicant_race_2, applicant_race_3, applicant_race_4, applicant_race_name_5, applicant_sex,application_date_indicator, as_of_year, census_tract_number, co_applicant_ethnicity, co_applicant_race_1, co_applicant_race_2, co_applicant_race_3, co_applicant_race_4, co_applicant_race_5, co_applicant_sex,county_code, denial_reason_1, denial_reason_2, denial_reason_3, edit_status, hoepa_status, lien_status, loan_amount_000s, loan_purpose,loan_type, msamd, owner_occupancy, preapproval, property_type, purchaser_type, state_code, number_of_1_to_4_family_units, number_of_owner_occupied_units, hud_median_family_income, minority_population, population, rate_spread, tract_to_msamd_income)
+na.omit(hmdacon)
+summary(hmdacon)
+
+## create a table
+for(n in c(1:43)){
+  hmdacon.df[n,1] = mean(hmdacon[[n]], na.rm = TRUE)
+}
+
+Mode = function(x){
+  ux = sort(unique(x))
+  tabx= table(x)
+  maxf = ux[which(tabx == max(tabx))]
+  return(maxf)
+}
+
+for(n in c(1:17)){
+  hmdacon.df[n,2] = Mode(hmdacon[[n]])
+}
+
+for(n in c(19:43)){
+  hmdacon.df[n,2] = Mode(hmdacon[[n]])
+}
+## As there is a speical variable which has two mode and can't simply run with loop, we calculate it seperatly
+Mode(hmdacon[[18]])
+hmdacon.df[18,2] = "4,5"
+
+for(n in c(1:43)){
+  hmdacon.df[n,3] = sd(hmdacon[[n]], na.rm =  TRUE)
+}
+
+for(n in c(1:43)){
+  hmdacon.df[n,4] = median(hmdacon[[n]], na.rm = TRUE)
+}
+
+for(n in c(1:43)){
+  hmdacon.df[n,5] = max(hmdacon[[n]]) - min((hmdacon[[n]]))
+}
+
+names(hmdacon.df) <- c("mean","mode","standard deviation","median","range")
 ```
+
+
 4. How do you handle missing data in this dataset?
-<<<<<<< HEAD
 # Firstly, we need to decide whether the missing data is missing at random. For instance, applicants with lower income may not be willing to reveal their income level. 
 ## If the data is missing at random, we could simply remove the missing data sample since we have huge amount of observations. There are 2 types of deletion: listwise, 
 # Listwise deletion (complete-case analysis) removes all data for an observation if there is one or more missing values. For example, in this dataset, most spaces in colomn V43 in blank, so we could delete this column for simplicity. Pairwise deletion analyses all cases in which the variables of interest are present and thus maximizes all data available by an analysis basis.
 # If the data is missing not at random, we could replace missing data with substituted values. For instance, one of the choices is to replace the missing data with the mean of the data we have. Using this method, we could avoid circumstances such as default listwise deletion. 
+<<<<<<< HEAD
 newdata<-ny_hmda_2015[which(ny_hmda_2015$V8 != "" & ny_hmda_2015$V71 != "" ),] 
 omit.ny<- newdata
 
@@ -33,20 +98,39 @@ omit.ny<- newdata
 5. Provide histograms/density plots for key variables, such as action taken on loan, gender,
 ethnicity, etc.
 =======
+=======
+
+
+>>>>>>> ff96b024b330bf64a82fb244029d1cf41b26bbc3
 5. Provide histograms/density plots for key variables, such as action taken on loan, gender, ethnicity, etc.
->>>>>>> 8d7c33d78e0e5eba56e64db158761e5ee9d0f6f3
 ```{r}
+homeMortgage=read.csv("ny_hmda_2015.csv")
+install.packages("tidyverse")
+
+install.packages("rpart")
+install.packages("rpart.plot")
+install.packages("caTools")
+install.packages("caret")
+install.packages("DT")
+
+library(tidyverse)
+library(rpart)
+library(rpart.plot)
+library(caTools)
+library(caret)
+library(DT)
+
+rm(list=ls())
 # Histogram for action taken on loan
 homeMortgageStatus = homeMortgage %>% group_by(action_taken_name) %>%
-summarise(CountOfActionTaken = n()) %>%
-arrange(desc(CountOfActionTaken))
-
-ggplot(homeMortgageStatus, aes(x = reorder(action_taken_name, CountOfActionTaken), y = CountOfActionTaken)) +
+summarise(CountOfActionTaken = n()) 
+homeMortgageStatus %>%
+ggplot(aes(x = action_taken_name, y = CountOfActionTaken)) +
 geom_bar(stat='identity',colour="white", fill ="yellow") +
-geom_text(aes(x = action_taken_name, y=1,sep="",label=paste0(CountOfActionTaken)),
+geom_text(aes(x = action_taken_name, y=1,label=paste0(CountOfActionTaken)),
             hjust=0, vjust=.5, size = 4, colour = 'black',
             fontface = 'bold') +
-labs(x = 'action_taken_name', y = 'Count Of Action Taken', title = 'Actions in Loans') +
+labs(x = 'action_taken_name', y = 'Count Of Action Taken', title = 'Histogram for action taken on loan') +
 coord_flip() + 
 theme_bw()
 ```
@@ -54,15 +138,14 @@ theme_bw()
 ```{r}
 # Histogram for gender
 homeMortgageGender = homeMortgage %>% group_by(applicant_sex_name) %>%
-summarise(CountOfSex = n()) %>%
-arrange(desc(CountOfSex))
-
-ggplot(homeMortgageGender, aes(x = reorder(applicant_sex_name, CountOfSex), y = CountOfSex)) +
+summarise(CountOfActionTaken = n()) 
+homeMortgageGender %>%
+ggplot(aes(x = applicant_sex_name, y = CountOfActionTaken)) +
 geom_bar(stat='identity',colour="white", fill ="yellow") +
-geom_text(aes(x = applicant_sex_name, y=1,sep="",label=paste0(CountOfSex)),
+geom_text(aes(x = applicant_sex_name, y=1,label=paste0(CountOfActionTaken)),
             hjust=0, vjust=.5, size = 4, colour = 'black',
             fontface = 'bold') +
-labs(x = 'Gender', y = 'Count', title = 'Histogram for Gender') +
+labs(x = 'Gender', y = 'Count Of Action Taken', title = 'Histogram for gender') +
 coord_flip() + 
 theme_bw()
 ```
@@ -70,18 +153,23 @@ theme_bw()
 ```{r}
 # Histogram for ethnicity
 homeMortgageEthnicity = homeMortgage %>% group_by(applicant_ethnicity_name) %>%
-summarise(CountOfEthnicity = n()) %>%
-arrange(desc(CountOfEthnicity))
-
-ggplot(homeMortgageEthnicity, aes(x = reorder(applicant_ethnicity_name, CountOfEthnicity), y = CountOfEthnicity)) +
+summarise(CountOfActionTaken = n()) 
+homeMortgageEthnicity %>%
+ggplot(aes(x = applicant_ethnicity_name, y = CountOfActionTaken)) +
 geom_bar(stat='identity',colour="white", fill ="yellow") +
-geom_text(aes(x = applicant_ethnicity_name, y=1,sep="",label=paste0(CountOfEthnicity)),
+geom_text(aes(x = applicant_ethnicity_name, y=1,label=paste0(CountOfActionTaken)),
             hjust=0, vjust=.5, size = 4, colour = 'black',
             fontface = 'bold') +
-labs(x = 'Ethinicity', y = 'Count', title = 'Histogram for Ethnicity') +
+labs(x = 'Ethnicity', y = 'Count Of Action Taken', title = 'Histogram for ethnicity') +
 coord_flip() + 
 theme_bw()
 ```
+
+```{r}
+# Histogram for applicant's income
+hist(homeMortgage$applicant_income_000s,main="Histogram of income",n=100,xlab="Applicant's income in thousands",ylab="Count",col="yellow",xlim=c(0,1500))
+```
+
 
 6. Create bivariate frequency distributions (tables or plots) for key variables
 ```{r}
@@ -131,11 +219,57 @@ homeMortgageGender3 %>%
   theme_bw()
 ```
 
+```{r}
+# Bivariate frequency distribution for applicant's income
+homeMortgage %>%
+  
+ggplot(aes(applicant_income_000s)) +
+  scale_x_continuous(limits = c(0, 400)) +
+  geom_histogram(fill = c("yellow")) +
+  labs(x = 'Income in Thousands', y = 'Count', title = 'Applicant Income distribution for loan action taken') +  theme_bw()+facet_wrap(~action_taken_name)
+```
+
+
 7. Discuss what the data patterns indicate, and what this could mean for the probability of
 getting a loan approved.
 ```{r}
+selectedCols = c("action_taken","applicant_ethnicity",        
+"applicant_income_000s","applicant_race_1","co_applicant_ethnicity",
+"co_applicant_sex", "county_code","hoepa_status","lien_status",
+"loan_purpose","loan_type","msamd",                                              
+"owner_occupancy","preapproval",
+"property_type","purchaser_type","loan_amount_000s")
 
-```
+homeMortgage_selectedCols = homeMortgage %>% select(selectedCols) %>%
+  mutate(isLoanOriginated = FALSE)  %>%
+  mutate(isLoanOriginated = replace(isLoanOriginated, action_taken == 1, TRUE)) %>%
+  select(-action_taken)
+
+homeMortgage_selectedCols$applicant_ethnicity = as.factor(homeMortgage_selectedCols$applicant_ethnicity)
+homeMortgage_selectedCols$applicant_race_1 = as.factor(homeMortgage_selectedCols$applicant_ethnicity)
+homeMortgage_selectedCols$co_applicant_ethnicity = as.factor(homeMortgage_selectedCols$co_applicant_ethnicity)
+homeMortgage_selectedCols$co_applicant_sex = as.factor(homeMortgage_selectedCols$co_applicant_sex)
+homeMortgage_selectedCols$county_code = as.factor(homeMortgage_selectedCols$county_code)
+homeMortgage_selectedCols$hoepa_status =  as.factor(homeMortgage_selectedCols$hoepa_status)
+homeMortgage_selectedCols$lien_status =  as.factor(homeMortgage_selectedCols$lien_status)
+homeMortgage_selectedCols$loan_purpose =  as.factor(homeMortgage_selectedCols$loan_purpose)
+homeMortgage_selectedCols$loan_type =  as.factor(homeMortgage_selectedCols$loan_type)
+homeMortgage_selectedCols$owner_occupancy =  as.factor(homeMortgage_selectedCols$owner_occupancy)  
+homeMortgage_selectedCols$preapproval =  as.factor(homeMortgage_selectedCols$preapproval)  
+homeMortgage_selectedCols$property_type =  as.factor(homeMortgage_selectedCols$property_type) 
+homeMortgage_selectedCols$purchaser_type =  as.factor(homeMortgage_selectedCols$purchaser_type)
+
+set.seed(3000)
+split = sample.split(homeMortgage_selectedCols$isLoanOriginated, SplitRatio = 0.7)
+Train = subset(homeMortgage_selectedCols, split==TRUE)
+Test = subset(homeMortgage_selectedCols, split==FALSE)
+   
+# CART model
+homeMortgageTree = rpart(isLoanOriginated ~ ., method="class", data = Train, control=rpart.control(minbucket=5))
+
+prp(homeMortgageTree)
+# We randomly selected 3000 samples and set the training set/ test set ratio to be 0.7. According to the result, for instance, loan could be approved if lien_stats is not 4 and purchase is not zaro, loan_pur=3, loan_typ =2,3,4, county_c= 1,5,7,...119 and loan_amo < 418, which is the most complex case. It can also be approved when lien_stats is not 4 and purchase is zero. Therefore, lien_sts is the most important term and purchse is the secondly one. Loan_pur ,loan_typ, county_c and loan_amo are listed in order of importance.
+# Also, from previous graphs, we can see that people who are not Hispanic or Latino are most likely to get loan originated. While gender affects little on whether loan will be originated, with male accounting for 58% and female accounting for 57%.
 
 
 
