@@ -90,8 +90,18 @@ names(hmdacon.df) <- c("mean","mode","standard deviation","median","range")
 ## If the data is missing at random, we could simply remove the missing data sample since we have huge amount of observations. There are 2 types of deletion: listwise, 
 # Listwise deletion (complete-case analysis) removes all data for an observation if there is one or more missing values. For example, in this dataset, most spaces in colomn V43 in blank, so we could delete this column for simplicity. Pairwise deletion analyses all cases in which the variables of interest are present and thus maximizes all data available by an analysis basis.
 # If the data is missing not at random, we could replace missing data with substituted values. For instance, one of the choices is to replace the missing data with the mean of the data we have. Using this method, we could avoid circumstances such as default listwise deletion. 
+<<<<<<< HEAD
+newdata<-ny_hmda_2015[which(ny_hmda_2015$V8 != "" & ny_hmda_2015$V71 != "" ),] 
+omit.ny<- newdata
 
 
+5. Provide histograms/density plots for key variables, such as action taken on loan, gender,
+ethnicity, etc.
+=======
+=======
+
+
+>>>>>>> ff96b024b330bf64a82fb244029d1cf41b26bbc3
 5. Provide histograms/density plots for key variables, such as action taken on loan, gender, ethnicity, etc.
 ```{r}
 setwd("~/Downloads")
