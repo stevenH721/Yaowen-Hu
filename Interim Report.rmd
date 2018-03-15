@@ -10,7 +10,7 @@ Title: Interim Report I
 Author: Yaowen Hu, Qingqing Cai, Yumei Xiong, Yu Shi
 ---
 1. What is the data problem? What is the final managerial objective?
-# To begin with, some of the column names are not clear enough. For example, the "applicant_date_indicator" is confusing. 
+ 
 # Secondly, there are too much missing data, leaving a lot of blank space in the data, which seems abundant.
 #Thirdly, the data set is seriously biased. The sample contains 283335 white applicants, but only 27890 asian applicants, indicating that the sample is not randomly selected.   
 
@@ -114,7 +114,11 @@ ethnicity, etc.
 >>>>>>> ff96b024b330bf64a82fb244029d1cf41b26bbc3
 5. Provide histograms/density plots for key variables, such as action taken on loan, gender, ethnicity, etc.
 ```{r}
-homeMortgage=read.csv("ny_hmda_2015.csv")
+setwd("~/Downloads")
+ny_hmda_2015=read.csv("ny_hmda_2015.csv")
+homeMortgage=ny_hmda_2015[which(ny_hmda_2015[,8] != "NA" & ny_hmda_2015[,71] != "NA" ),]  
+omit.ny=homeMortgage
+
 install.packages("tidyverse")
 
 install.packages("rpart")
@@ -150,11 +154,9 @@ theme_bw()
 homeMortgageGender = homeMortgage %>% group_by(applicant_sex_name) %>%
 summarise(CountOfActionTaken = n()) 
 homeMortgageGender %>%
-ggplot(aes(x = applicant_sex_name, y = CountOfActionTaken)) +
+ggplot(aes(x = applicant_sex_name, y=CountOfActionTaken)) +
 geom_bar(stat='identity',colour="white", fill ="yellow") +
-geom_text(aes(x = applicant_sex_name, y=1,label=paste0(CountOfActionTaken)),
-            hjust=0, vjust=.5, size = 4, colour = 'black',
-            fontface = 'bold') +
+geom_text(aes(y=1,label=paste0(CountOfActionTaken))) +
 labs(x = 'Gender', y = 'Count Of Action Taken', title = 'Histogram for gender') +
 coord_flip() + 
 theme_bw()
@@ -167,7 +169,7 @@ summarise(CountOfActionTaken = n())
 homeMortgageEthnicity %>%
 ggplot(aes(x = applicant_ethnicity_name, y = CountOfActionTaken)) +
 geom_bar(stat='identity',colour="white", fill ="yellow") +
-geom_text(aes(x = applicant_ethnicity_name, y=1,label=paste0(CountOfActionTaken)),
+geom_text(aes(x = applicant_ethnicity_name, y=100,label=paste0(CountOfActionTaken)),
             hjust=0, vjust=.5, size = 4, colour = 'black',
             fontface = 'bold') +
 labs(x = 'Ethnicity', y = 'Count Of Action Taken', title = 'Histogram for ethnicity') +
@@ -193,7 +195,7 @@ homeMortgageEthnicity3 = inner_join(homeMortgageEthnicity,homeMortgageEthnicity2
 mutate(percentage = (CountOfActionTaken/CountOfEthnicity) * 100 ) 
 
 homeMortgageEthnicity3 %>%
-  ggplot(aes(x = reorder(action_taken_name, percentage), 
+  ggplot(aes(x = action_taken_name, 
                                y = percentage)) +
   geom_bar(stat='identity',colour="white", fill ="yellow") +
   facet_wrap(~ applicant_ethnicity_name) +
@@ -236,7 +238,7 @@ homeMortgage %>%
 ggplot(aes(applicant_income_000s)) +
   scale_x_continuous(limits = c(0, 400)) +
   geom_histogram(fill = c("yellow")) +
-  labs(x = 'Income in Thousands', y = 'Count', title = 'Applicant Income distribution for loan action taken') +  theme_bw()+facet_wrap(~action_taken_name)
+  labs(x = 'Income in Thousands', y = 'Count', title = 'Applicant Income distribution for loan action taken') +  facet_wrap(~action_taken_name)+theme_bw()
 ```
 6. Define a variable “Loan_Approval” based on the action taken on loan. Discuss how you defined this variable.
 unique(newdata$V2)
