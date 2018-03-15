@@ -94,6 +94,16 @@ names(hmdacon.df) <- c("mean","mode","standard deviation","median","range")
 newdata<-ny_hmda_2015[which(ny_hmda_2015$V8 != "" & ny_hmda_2015$V71 != "" ),] 
 omit.ny<- newdata
 
+for(n in c(1:78)){print(sum(is.na(ny_hmda_2015[,n])))}
+```{r}
+
+```
+
+missingdata.df <- data.frame(matrix(NA, nrow = 78, ncol = 1))
+for(n in c(1:78)){
+  missingdata.df[n,1] = sum(is.na(hmda[[n]]))
+}
+missingdata.df
 
 5. Provide histograms/density plots for key variables, such as action taken on loan, gender,
 ethnicity, etc.
@@ -228,8 +238,21 @@ ggplot(aes(applicant_income_000s)) +
   geom_histogram(fill = c("yellow")) +
   labs(x = 'Income in Thousands', y = 'Count', title = 'Applicant Income distribution for loan action taken') +  theme_bw()+facet_wrap(~action_taken_name)
 ```
+6. Define a variable “Loan_Approval” based on the action taken on loan. Discuss how you defined this variable.
+unique(newdata$V2)
+table(newdata$V1)
+table(newdata$V2)
 
 
+newdata %>% 
+mutate(Loan_Approval)
+if(newdata$V1==1|newdata$V1==2|newdata$V1==6)
+{Loan_Approval<-1} else{Loan_Approval<-0}
+
+Loan_Approval[newdata$V1==1|newdata$V1==2|newdata$V1==6]<-1
+
+newdata$Loan_Approval <- ifelse(newdata$V1==1|newdata$V1==2|newdata$V1==6,1,0)
+table(newdata$Loan_Approval)
 7. Discuss what the data patterns indicate, and what this could mean for the probability of
 getting a loan approved.
 ```{r}
@@ -272,5 +295,8 @@ prp(homeMortgageTree)
 # Also, from previous graphs, we can see that people who are not Hispanic or Latino are most likely to get loan originated. While gender affects little on whether loan will be originated, with male accounting for 58% and female accounting for 57%.
 
 
+8. Discuss the determinants of loan approval with respect to loan amounts, household income, applicant’s gender and race. Clearly state the dependent and independent variables used in your regression analysis. Interpret the findings of this analysis, and note the R-squared.
 
-
+model1<-glm(newdata$Loan_Approval~newdata$V72+newdata$V71+newdata$V19+newdata$V9,family = binomial(link = "logit"),data = newdata)
+a = newdata$Loan_Approval
+model1<-glm(a~newdata$V72+newdata$V71+newdata$V19+newdata$V9,family = binomial(link = "logit"),data = newdata)
