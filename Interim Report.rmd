@@ -11,8 +11,7 @@ Author: Yaowen Hu, Qingqing Cai, Yumei Xiong, Yu Shi
 ---
 1. What is the data problem? What is the final managerial objective?
  
-# Secondly, there are too much missing data, leaving a lot of blank space in the data, which seems abundant.
-#Thirdly, the data set is seriously biased. The sample contains 283335 white applicants, but only 27890 asian applicants, indicating that the sample is not randomly selected.   
+
 
 # Managerial objective: The bank would like to provide loans to the applicants that are in a good financial status, thus are least likely to default.
 
@@ -95,15 +94,9 @@ newdata<-ny_hmda_2015[which(ny_hmda_2015$V8 != "" & ny_hmda_2015$V71 != "" ),]
 omit.ny<- newdata
 
 
-5. Provide histograms/density plots for key variables, such as action taken on loan, gender,
-ethnicity, etc.
-=======
-=======
-
-
->>>>>>> ff96b024b330bf64a82fb244029d1cf41b26bbc3
 5. Provide histograms/density plots for key variables, such as action taken on loan, gender, ethnicity, etc.
 ```{r}
+
 setwd("~/Downloads")
 ny_hmda_2015=read.csv("ny_hmda_2015.csv")
 homeMortgage=ny_hmda_2015[which(ny_hmda_2015[,8] != "NA" & ny_hmda_2015[,71] != "NA" ),]  
@@ -174,105 +167,215 @@ hist(homeMortgage$applicant_income_000s,main="Histogram of income",n=100,xlab="A
 
 
 6. Create bivariate frequency distributions (tables or plots) for key variables
+
 ```{r}
 # Bivariate frequency distribution for ethnicity
-homeMortgageEthnicity2 = homeMortgage %>% group_by(action_taken_name,applicant_ethnicity_name) %>%
-summarise(CountOfActionTaken = n()) 
-homeMortgageEthnicity = homeMortgage %>% group_by(applicant_ethnicity_name) %>%
+homeMortgageEthnicity = homeMortgage %>% 
+group_by(applicant_ethnicity_name) %>%
 summarise(CountOfEthnicity = n()) 
+
+homeMortgageEthnicity2 = homeMortgage %>% 
+group_by(action_taken_name,applicant_ethnicity_name) %>%
+summarise(CountOfActionTaken = n()) 
 
 homeMortgageEthnicity3 = inner_join(homeMortgageEthnicity,homeMortgageEthnicity2) %>%
 mutate(percentage = (CountOfActionTaken/CountOfEthnicity) * 100 ) 
 
 homeMortgageEthnicity3 %>%
-  ggplot(aes(x = action_taken_name, 
-                               y = percentage)) +
-  geom_bar(stat='identity',colour="white", fill ="yellow") +
+  ggplot(aes(x = action_taken_name, y = percentage)) +
   facet_wrap(~ applicant_ethnicity_name) +
-  geom_text(aes(x = action_taken_name, y = 1, label = paste0("(",round(percentage),"%)",sep="")),
-            hjust=0, vjust=.5, size = 4, colour = 'black',
-            fontface = 'bold') +
-  labs(x = 'action_taken_name', y = '%age Count Of Action Taken', title = 'Actions in Loans') +
+  geom_bar(stat="identity",fill="lightblue") +
+  geom_text(aes(x = action_taken_name, y = 1, label = ifelse(floor(round(percentage,1))==round(percentage,1),paste0(round(percentage,1),".0%"),paste0(round(percentage,1),"%"))),
+            hjust=0,size = 4.5, colour = "black") +
+  labs(x = "action_taken_name", y = "Percentage Count Of Action Taken", title = "Actions in Loans by Ethnicity") +
   coord_flip() + 
   theme_bw()
-
 ```
+From the graphs, we can see that applicants who are not Hispanic or Latino are more likely (60.0%) to have loan originated than those are Hispanic or Latino (49.9%). Also, applicants who are not Hispanic or Latino have a chance of 18.7% to have their application denied by financial institution, which is less than those who are Hispanic or Latino (24.8%).
+
+```{r}
+# Bivariate frequency distribution for income
+homeMortgage$Income.Level="0"
+homeMortgage[homeMortgage$applicant_income_000s<=50,]$Income.Level="Low Income"
+homeMortgage[homeMortgage$applicant_income_000s>50 & homeMortgage$applicant_income_000s<=150,]$Income.Level="Medium Income"
+homeMortgage[homeMortgage$applicant_income_000s>150,]$Income.Level="High Income"
+
+homeMortgageIncome = homeMortgage %>% 
+group_by(Income.Level) %>%
+summarise(CountOfIncome = n()) 
+
+homeMortgageIncome2 = homeMortgage %>% 
+group_by(action_taken_name,Income.Level) %>%
+summarise(CountOfActionTaken = n()) 
+
+homeMortgageIncome3 = inner_join(homeMortgageIncome,homeMortgageIncome2) %>%
+mutate(percentage = (CountOfActionTaken/CountOfIncome) * 100 ) 
+
+homeMortgageIncome3 %>%
+  ggplot(aes(x = action_taken_name, y = percentage)) +
+  facet_wrap(~ Income.Level) +
+  geom_bar(stat="identity",fill="lightblue") +
+  geom_text(aes(x = action_taken_name, y = 1, label = ifelse(floor(round(percentage,1))==round(percentage,1),paste0(round(percentage,1),".0%"),paste0(round(percentage,1),"%"))),
+            hjust=0,size = 4.5, colour = "black") +
+  labs(x = "action_taken_name", y = "Percentage Count Of Action Taken", title = "Actions in Loans by Income") +
+  coord_flip() + 
+  theme_bw()
+```
+We divide applicants' income into three levels. Applicants whose income is lower than $50,000 are considered as low income people. Medium income applicants have income between $50,000 and $150,000, and high income applicants have income over $150,000.
+From the graphs, we can see that high income applicants are most likely to have loan originated (59.5%),followed by medium income applicants (56.6%), and low income applicants are least likely to have loan originated (50.3%). When it comes to application denied by financial institution, the sequence is inverse, with probability of 14.1%, 17.9% and 29.2% for high, medium and low income applicants respectively. The reason is intuitively straightforward, that higher the income, the more guarantee of paying back loan, and the financial institution is more likely to originate loans with less worries of default.
+
+```{r}
+# Bivariate frequency distribution for race
+homeMortgageRace = homeMortgage %>% 
+group_by(applicant_race_name_1) %>%
+summarise(CountOfRace = n()) 
+
+homeMortgageRace2 = homeMortgage %>% 
+group_by(action_taken_name,applicant_race_name_1) %>%
+summarise(CountOfActionTaken = n()) 
+
+homeMortgageRace3 = inner_join(homeMortgageRace,homeMortgageRace2) %>%
+mutate(percentage = (CountOfActionTaken/CountOfRace) * 100 ) 
+
+homeMortgageRace3 %>%
+  ggplot(aes(x = action_taken_name, y = percentage)) +
+  facet_wrap(~ applicant_race_name_1) +
+  geom_bar(stat="identity",fill="lightblue") +
+  geom_text(aes(x = action_taken_name, y = 1, label = ifelse(floor(round(percentage,1))==round(percentage,1),paste0(round(percentage,1),".0%"),paste0(round(percentage,1),"%"))),
+            hjust=0,size = 4.5, colour = "black") +
+  labs(x = "action_taken_name", y = "Percentage Count Of Action Taken", title = "Actions in Loans by Race") +
+  coord_flip() + 
+  theme_bw()
+```
+From the graphs, we can see that applicants who are White are most likely (61.3%) to have loan originated, while those who are American Indian or Alaska Native are least likely (41.3%). Also, applicants who White have the lowest chance of 17.8% to have their application denied by financial institution, while this percentage is 36.4% for those who are American Indian or Alaska Native.
 
 ```{r}
 # Bivariate frequency distribution for gender
-homeMortgageGender2 = homeMortgage %>% group_by(action_taken_name,applicant_sex_name) %>%
-summarise(CountOfActionTaken = n()) 
-homeMortgageGender = homeMortgage %>% group_by(applicant_sex_name) %>%
+homeMortgageSex = homeMortgage %>% 
+group_by(applicant_sex_name) %>%
 summarise(CountOfSex = n()) 
 
-homeMortgageGender3 = inner_join(homeMortgageGender,homeMortgageGender2) %>%
+homeMortgageSex2 = homeMortgage %>% 
+group_by(action_taken_name,applicant_sex_name) %>%
+summarise(CountOfActionTaken = n()) 
+
+homeMortgageSex3 = inner_join(homeMortgageSex,homeMortgageSex2) %>%
 mutate(percentage = (CountOfActionTaken/CountOfSex) * 100 ) 
 
-homeMortgageGender3 %>%
-  ggplot(aes(x = reorder(action_taken_name, percentage), 
-                               y = percentage)) +
-  geom_bar(stat='identity',colour="white", fill ="yellow") +
+homeMortgageSex3 %>%
+  ggplot(aes(x = action_taken_name, y = percentage)) +
   facet_wrap(~ applicant_sex_name) +
-  geom_text(aes(x = action_taken_name, y = 1, label = paste0("(",round(percentage),"%)",sep="")),
-            hjust=0, vjust=.5, size = 4, colour = 'black',
-            fontface = 'bold') +
-  labs(x = 'action_taken_name', y = '%age Count Of Action Taken', title = 'Actions in Loans') +
+  geom_bar(stat="identity",fill="lightblue") +
+  geom_text(aes(x = action_taken_name, y = 1, label = ifelse(floor(round(percentage,1))==round(percentage,1),paste0(round(percentage,1),".0%"),paste0(round(percentage,1),"%"))),
+            hjust=0,size = 4.5, colour = "black") +
+  labs(x = "action_taken_name", y = "Percentage Count Of Action Taken", title = "Actions in Loans by Gender") +
   coord_flip() + 
   theme_bw()
 ```
+From the graphs, we can see that gender has slight effects on actions in loans. Male applicants are slightly more likely (59.0%) to have loan originated than female applicants (58.4%). Also, male applicants are less likely to have their application denied by financial institution, with the probability of 18.8%, which is less than female applicants (20.8%).
 
 ```{r}
-# Bivariate frequency distribution for applicant's income
-homeMortgage %>%
-  
-ggplot(aes(applicant_income_000s)) +
-  scale_x_continuous(limits = c(0, 400)) +
-  geom_histogram(fill = c("yellow")) +
-  labs(x = 'Income in Thousands', y = 'Count', title = 'Applicant Income distribution for loan action taken') +  facet_wrap(~action_taken_name)+theme_bw()
+# Bivariate frequency distribution for hoepa status
+homeMortgageHoepa = homeMortgage %>% 
+group_by(hoepa_status_name) %>%
+summarise(CountOfHoepa = n()) 
+
+homeMortgageHoepa2 = homeMortgage %>% 
+group_by(action_taken_name,hoepa_status_name) %>%
+summarise(CountOfActionTaken = n()) 
+
+homeMortgageHoepa3 = inner_join(homeMortgageHoepa,homeMortgageHoepa2) %>%
+mutate(percentage = (CountOfActionTaken/CountOfHoepa) * 100 ) 
+
+homeMortgageHoepa3 %>%
+  ggplot(aes(x = action_taken_name, y = percentage)) +
+  facet_wrap(~ hoepa_status_name) +
+  geom_bar(stat="identity",fill="lightblue") +
+  geom_text(aes(x = action_taken_name, y = 1, label = ifelse(floor(round(percentage,1))==round(percentage,1),paste0(round(percentage,1),".0%"),paste0(round(percentage,1),"%"))),
+            hjust=0,size = 4.5, colour = "black") +
+  labs(x = "action_taken_name", y = "Percentage Count Of Action Taken", title = "Actions in Loans by Hoepa Status") +
+  coord_flip() + 
+  theme_bw()
 ```
+From the graphs, we can see that whether a loan is subject to HOEPA has large effects on actions in loans. All of the HOEPA loans are originated, while only 56.0% of non-HOEPA loans are originated, with 19.2% of them denied by financial insititution.
 
-
-7. Discuss what the data patterns indicate, and what this could mean for the probability of
-getting a loan approved.
 ```{r}
-selectedCols = c("action_taken","applicant_ethnicity",        
-"applicant_income_000s","applicant_race_1","co_applicant_ethnicity",
-"co_applicant_sex", "county_code","hoepa_status","lien_status",
-"loan_purpose","loan_type","msamd",                                              
-"owner_occupancy","preapproval",
-"property_type","purchaser_type","loan_amount_000s")
+# Bivariate frequency distribution for lien status
+homeMortgageLien = homeMortgage %>% 
+group_by(lien_status_name) %>%
+summarise(CountOfLien = n()) 
 
-homeMortgage_selectedCols = homeMortgage %>% select(selectedCols) %>%
-  mutate(isLoanOriginated = FALSE)  %>%
-  mutate(isLoanOriginated = replace(isLoanOriginated, action_taken == 1, TRUE)) %>%
-  select(-action_taken)
+homeMortgageLien2 = homeMortgage %>% 
+group_by(action_taken_name,lien_status_name) %>%
+summarise(CountOfActionTaken = n()) 
 
-homeMortgage_selectedCols$applicant_ethnicity = as.factor(homeMortgage_selectedCols$applicant_ethnicity)
-homeMortgage_selectedCols$applicant_race_1 = as.factor(homeMortgage_selectedCols$applicant_ethnicity)
-homeMortgage_selectedCols$co_applicant_ethnicity = as.factor(homeMortgage_selectedCols$co_applicant_ethnicity)
-homeMortgage_selectedCols$co_applicant_sex = as.factor(homeMortgage_selectedCols$co_applicant_sex)
-homeMortgage_selectedCols$county_code = as.factor(homeMortgage_selectedCols$county_code)
-homeMortgage_selectedCols$hoepa_status =  as.factor(homeMortgage_selectedCols$hoepa_status)
-homeMortgage_selectedCols$lien_status =  as.factor(homeMortgage_selectedCols$lien_status)
-homeMortgage_selectedCols$loan_purpose =  as.factor(homeMortgage_selectedCols$loan_purpose)
-homeMortgage_selectedCols$loan_type =  as.factor(homeMortgage_selectedCols$loan_type)
-homeMortgage_selectedCols$owner_occupancy =  as.factor(homeMortgage_selectedCols$owner_occupancy)  
-homeMortgage_selectedCols$preapproval =  as.factor(homeMortgage_selectedCols$preapproval)  
-homeMortgage_selectedCols$property_type =  as.factor(homeMortgage_selectedCols$property_type) 
-homeMortgage_selectedCols$purchaser_type =  as.factor(homeMortgage_selectedCols$purchaser_type)
+homeMortgageLien3 = inner_join(homeMortgageLien,homeMortgageLien2) %>%
+mutate(percentage = (CountOfActionTaken/CountOfLien) * 100 ) 
 
-set.seed(3000)
-split = sample.split(homeMortgage_selectedCols$isLoanOriginated, SplitRatio = 0.7)
-Train = subset(homeMortgage_selectedCols, split==TRUE)
-Test = subset(homeMortgage_selectedCols, split==FALSE)
-   
-# CART model
-homeMortgageTree = rpart(isLoanOriginated ~ ., method="class", data = Train, control=rpart.control(minbucket=5))
+homeMortgageLien3 %>%
+  ggplot(aes(x = action_taken_name, y = percentage)) +
+  facet_wrap(~ lien_status_name) +
+  geom_bar(stat="identity",fill="lightblue") +
+  geom_text(aes(x = action_taken_name, y = 1, label = ifelse(floor(round(percentage,1))==round(percentage,1),paste0(round(percentage,1),".0%"),paste0(round(percentage,1),"%"))),
+            hjust=0,size = 4.5, colour = "black") +
+  labs(x = "action_taken_name", y = "Percentage Count Of Action Taken", title = "Actions in Loans by Lien Status") +
+  coord_flip() + 
+  theme_bw()
+```
+From the graphs, we can see that loans secured by a first lien are most likely to be originated (61.9%),followed by loans secured by a subordinate lien (56.2%), and loans not secured by a lien are least likely to be originated (52.7%). When it comes to application denied by financial institution, the sequence is inverse, with probability of 19.0%, 31.5% and 41.5% for the above three types respectively. 
 
-prp(homeMortgageTree)
-# We randomly selected 3000 samples and set the training set/ test set ratio to be 0.7. According to the result, for instance, loan could be approved if lien_stats is not 4 and purchase is not zaro, loan_pur=3, loan_typ =2,3,4, county_c= 1,5,7,...119 and loan_amo < 418, which is the most complex case. It can also be approved when lien_stats is not 4 and purchase is zero. Therefore, lien_sts is the most important term and purchse is the secondly one. Loan_pur ,loan_typ, county_c and loan_amo are listed in order of importance.
-# Also, from previous graphs, we can see that people who are not Hispanic or Latino are most likely to get loan originated. While gender affects little on whether loan will be originated, with male accounting for 58% and female accounting for 57%.
+```{r}
+# Bivariate frequency distribution for loan purpose
+homeMortgageLoanPurpose = homeMortgage %>% 
+group_by(loan_purpose_name) %>%
+summarise(CountOfLoanPurpose = n()) 
 
+homeMortgageLoanPurpose2 = homeMortgage %>% 
+group_by(action_taken_name,loan_purpose_name) %>%
+summarise(CountOfActionTaken = n()) 
 
+homeMortgageLoanPurpose3 = inner_join(homeMortgageLoanPurpose,homeMortgageLoanPurpose2) %>%
+mutate(percentage = (CountOfActionTaken/CountOfLoanPurpose) * 100 ) 
 
+homeMortgageLoanPurpose3 %>%
+  ggplot(aes(x = action_taken_name, y = percentage)) +
+  facet_wrap(~ loan_purpose_name) +
+  geom_bar(stat="identity",fill="lightblue") +
+  geom_text(aes(x = action_taken_name, y = 1, label = ifelse(floor(round(percentage,1))==round(percentage,1),paste0(round(percentage,1),".0%"),paste0(round(percentage,1),"%"))),
+            hjust=0,size = 4.5, colour = "black") +
+  labs(x = "action_taken_name", y = "Percentage Count Of Action Taken", title = "Actions in Loans by Loan Purpose") +
+  coord_flip() + 
+  theme_bw()
+```
+From the graphs, we can see that loans used for home purchase are most likely to be originated (63.9%),followed by loans used for home improvement (56.2%), and loans used for refinancing are least likely to be originated (46.5%). When it comes to application denied by financial institution, loans used for home purchase are least likely to be denied (10.9%), followed by purpose of refinancing (25.2%) and home improvement (35.5%).
 
+```{r}
+# Bivariate frequency distribution for loan amount
+homeMortgage$LoanAmount.Level="0"
+homeMortgage[homeMortgage$loan_amount_000s<=100,]$LoanAmount.Level="Low Loan Amount"
+homeMortgage[homeMortgage$loan_amount_000s>100 & homeMortgage$loan_amount_000s<=350,]$LoanAmount.Level="Medium Loan Amount"
+homeMortgage[homeMortgage$loan_amount_000s>350,]$LoanAmount.Level="High Loan Amount"
+
+homeMortgageLoanAmount = homeMortgage %>% 
+group_by(LoanAmount.Level) %>%
+summarise(CountOfLoanAmount = n()) 
+
+homeMortgageLoanAmount2 = homeMortgage %>% 
+group_by(action_taken_name,LoanAmount.Level) %>%
+summarise(CountOfActionTaken = n()) 
+
+homeMortgageLoanAmount3 = inner_join(homeMortgageLoanAmount,homeMortgageLoanAmount2) %>%
+mutate(percentage = (CountOfActionTaken/CountOfLoanAmount) * 100 ) 
+
+homeMortgageLoanAmount3 %>%
+  ggplot(aes(x = action_taken_name, y = percentage)) +
+  facet_wrap(~ LoanAmount.Level) +
+  geom_bar(stat="identity",fill="lightblue") +
+  geom_text(aes(x = action_taken_name, y = 1, label = ifelse(floor(round(percentage,1))==round(percentage,1),paste0(round(percentage,1),".0%"),paste0(round(percentage,1),"%"))),
+            hjust=0,size = 4.5, colour = "black") +
+  labs(x = "action_taken_name", y = "Percentage Count Of Action Taken", title = "Actions in Loans by Loan Amount") +
+  coord_flip() + 
+  theme_bw()
+```
+We divide loan amount into three levels. Loan amount which is lower than $100,000 are considered as low loan amount. Medium loan amount has a range between $100,000 and $350,000, and high loan amount is over $350,000.
+From the graphs, we can see that medium amount loans are most likely to be originated (56.4%),followed by low amount loans (56.1%), and high amount loans are least likely to be originated (55.4%). When it comes to application denied by financial institution, the probability of being denied is 16.8%, 26.9% and 16.0% for the three types of loans respectively. The results are counterintuitive, and the reason may be that the loan amount that people apply for is correlated with other variables, such as loan purpose and applicant's income. the graphs here only reflect the relationship between actions in loan and loan amount, without taking into control other variables. 
