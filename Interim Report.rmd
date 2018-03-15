@@ -93,6 +93,16 @@ names(hmdacon.df) <- c("mean","mode","standard deviation","median","range")
 newdata<-ny_hmda_2015[which(ny_hmda_2015$V8 != "" & ny_hmda_2015$V71 != "" ),] 
 omit.ny<- newdata
 
+for(n in c(1:78)){print(sum(is.na(ny_hmda_2015[,n])))}
+```{r}
+
+```
+
+missingdata.df <- data.frame(matrix(NA, nrow = 78, ncol = 1))
+for(n in c(1:78)){
+  missingdata.df[n,1] = sum(is.na(hmda[[n]]))
+}
+missingdata.df
 
 5. Provide histograms/density plots for key variables, such as action taken on loan, gender, ethnicity, etc.
 ```{r}
@@ -297,6 +307,7 @@ homeMortgageHoepa3 %>%
   coord_flip() + 
   theme_bw()
 ```
+<<<<<<< HEAD
 From the graphs, we can see that whether a loan is subject to HOEPA has large effects on actions in loans. All of the HOEPA loans are originated, while only 56.0% of non-HOEPA loans are originated, with 19.2% of them denied by financial insititution.
 
 ```{r}
@@ -324,6 +335,25 @@ homeMortgageLien3 %>%
 ```
 From the graphs, we can see that loans secured by a first lien are most likely to be originated (61.9%),followed by loans secured by a subordinate lien (56.2%), and loans not secured by a lien are least likely to be originated (52.7%). When it comes to application denied by financial institution, the sequence is inverse, with probability of 19.0%, 31.5% and 41.5% for the above three types respectively. 
 
+=======
+6. Define a variable “Loan_Approval” based on the action taken on loan. Discuss how you defined this variable.
+unique(newdata$V2)
+table(newdata$V1)
+table(newdata$V2)
+
+
+newdata %>% 
+mutate(Loan_Approval)
+if(newdata$V1==1|newdata$V1==2|newdata$V1==6)
+{Loan_Approval<-1} else{Loan_Approval<-0}
+
+Loan_Approval[newdata$V1==1|newdata$V1==2|newdata$V1==6]<-1
+
+newdata$Loan_Approval <- ifelse(newdata$V1==1|newdata$V1==2|newdata$V1==6,1,0)
+table(newdata$Loan_Approval)
+7. Discuss what the data patterns indicate, and what this could mean for the probability of
+getting a loan approved.
+>>>>>>> 5066c748e39290871e6cb96097c9ddcbd309e3e8
 ```{r}
 # Bivariate frequency distribution for loan purpose
 homeMortgageLoanPurpose = homeMortgage %>% 
@@ -349,6 +379,7 @@ homeMortgageLoanPurpose3 %>%
 ```
 From the graphs, we can see that loans used for home purchase are most likely to be originated (63.9%),followed by loans used for home improvement (56.2%), and loans used for refinancing are least likely to be originated (46.5%). When it comes to application denied by financial institution, loans used for home purchase are least likely to be denied (10.9%), followed by purpose of refinancing (25.2%) and home improvement (35.5%).
 
+<<<<<<< HEAD
 ```{r}
 # Bivariate frequency distribution for loan amount
 homeMortgage$LoanAmount.Level="0"
@@ -379,3 +410,10 @@ homeMortgageLoanAmount3 %>%
 ```
 We divide loan amount into three levels. Loan amount which is lower than $100,000 are considered as low loan amount. Medium loan amount has a range between $100,000 and $350,000, and high loan amount is over $350,000.
 From the graphs, we can see that medium amount loans are most likely to be originated (56.4%),followed by low amount loans (56.1%), and high amount loans are least likely to be originated (55.4%). When it comes to application denied by financial institution, the probability of being denied is 16.8%, 26.9% and 16.0% for the three types of loans respectively. The results are counterintuitive, and the reason may be that the loan amount that people apply for is correlated with other variables, such as loan purpose and applicant's income. the graphs here only reflect the relationship between actions in loan and loan amount, without taking into control other variables. 
+=======
+8. Discuss the determinants of loan approval with respect to loan amounts, household income, applicant’s gender and race. Clearly state the dependent and independent variables used in your regression analysis. Interpret the findings of this analysis, and note the R-squared.
+
+model1<-glm(newdata$Loan_Approval~newdata$V72+newdata$V71+newdata$V19+newdata$V9,family = binomial(link = "logit"),data = newdata)
+a = newdata$Loan_Approval
+model1<-glm(a~newdata$V72+newdata$V71+newdata$V19+newdata$V9,family = binomial(link = "logit"),data = newdata)
+>>>>>>> 5066c748e39290871e6cb96097c9ddcbd309e3e8
