@@ -6,105 +6,72 @@ output:
 ---
 The URL for our Team GitHub repository is https://github.com/stevenH721/Yaowen-Hu.git
 The URL to the Kernel and Kaggle dataset is https://www.kaggle.com/jboysen/ny-home-mortgage
-Title: Interim Report I
+Title: Interim Report
 Author: Yaowen Hu, Qingqing Cai, Yumei Xiong, Yu Shi
 ---
-1. What is the data problem? What is the final managerial objective?
+
+Summry
  
 
 
-# Managerial objective: The bank would like to provide loans to the applicants that are in a good financial status, thus are least likely to default.
+Variable Description and Statistics
 
 
-2. Describe the measurement types of each variable
- #Based on our observation and result from str function, we conclue the measurement types as follow.
-Nominal: action_taken_name; agency_abbr; agency_name; applicant_ethnicity_name; applicant_race_name_1&2&3&4&5; applicant_sex_name; co_applicant_sex_name; country_name; denial_reason_name_1&2&3; edit_status_name; hoepa_status_name; lien_status_name; loan_purpose_name; msamd_name; owner_occupancy_name; preapproval_name; property_type_name; state_abbr; respondent_id
-
-Ordinal: as_of_year
-
-Interval: action_taken; agency_code; applicant_ethicity; applicant_race_1&2&3&4&5; applicant_sex; applicantion_date_indicatior; census_tract_number; co_applicant_ethnicity; co_applicant_race_1&2&3&4&5; co_applicant_sex; country_code; denial_reason_1&2&3; edit_status; hoepa_status; lien_status; loan_purpose; loan_type; msamd; owner_occupancy; preapproval; property_type; purchaser_type; sequence_number; state_code
-
-Ratio: hud_median_family_income; loan_amount_000s; number_of_1_to_4_family_units; number_of_owner_occupied_units; minority_population; population; tate_spread; tract_to_msamd_income
-
-
-3. Create a table summarizing the range or variation in each variable. Add statistics (mean,
-median, standard deviation, etc.) as you deem necessary.
-```{r}
-library(dplyr)
-
-homeMortgage=read.csv("ny_hmda_2015.csv")
-## summary table for discrete variables
-hmdadisc <- homeMortgage %>%
-  select(action_taken_name,agency_abbr,agency_name,applicant_ethnicity_name, applicant_race_name_1, applicant_race_name_2, applicant_race_name_3, applicant_race_name_4, applicant_race_name_5, applicant_sex_name, co_applicant_sex_name, county_name, denial_reason_name_1, denial_reason_name_2, denial_reason_name_3, edit_status_name, hoepa_status_name, lien_status_name, loan_purpose_name, msamd_name, owner_occupancy_name, preapproval_name, property_type_name, state_abbr)
-summary(hmdadisc)
-
-## summary table for continuous variables
-hmdacon.df <- data.frame(matrix(NA, nrow = 43, ncol = 5))
-hmdacon <- homeMortgage%>%
-  select(action_taken, agency_code, applicant_ethnicity, applicant_income_000s, applicant_race_1, applicant_race_2, applicant_race_3, applicant_race_4, applicant_race_name_5, applicant_sex,application_date_indicator, as_of_year, census_tract_number, co_applicant_ethnicity, co_applicant_race_1, co_applicant_race_2, co_applicant_race_3, co_applicant_race_4, co_applicant_race_5, co_applicant_sex,county_code, denial_reason_1, denial_reason_2, denial_reason_3, edit_status, hoepa_status, lien_status, loan_amount_000s, loan_purpose,loan_type, msamd, owner_occupancy, preapproval, property_type, purchaser_type, state_code, number_of_1_to_4_family_units, number_of_owner_occupied_units, hud_median_family_income, minority_population, population, rate_spread, tract_to_msamd_income)
-na.omit(hmdacon)
-summary(hmdacon)
-
-## create a table
-for(n in c(1:43)){
-  hmdacon.df[n,1] = mean(hmdacon[[n]], na.rm = TRUE)
-}
-
-Mode = function(x){
-  ux = sort(unique(x))
-  tabx= table(x)
-  maxf = ux[which(tabx == max(tabx))]
-  return(maxf)
-}
-
-for(n in c(1:17)){
-  hmdacon.df[n,2] = Mode(hmdacon[[n]])
-}
-
-for(n in c(19:43)){
-  hmdacon.df[n,2] = Mode(hmdacon[[n]])
-}
-## As there is a speical variable which has two mode and can't simply run with loop, we calculate it seperatly
-Mode(hmdacon[[18]])
-hmdacon.df[18,2] = "4,5"
-
-for(n in c(1:43)){
-  hmdacon.df[n,3] = sd(hmdacon[[n]], na.rm =  TRUE)
-}
-
-for(n in c(1:43)){
-  hmdacon.df[n,4] = median(hmdacon[[n]], na.rm = TRUE)
-}
-
-for(n in c(1:43)){
-  hmdacon.df[n,5] = max(hmdacon[[n]]) - min((hmdacon[[n]]))
-}
-
-names(hmdacon.df) <- c("mean","mode","standard deviation","median","range")
-```
-
-
-4. How do you handle missing data in this dataset?
+Handling Missing Data
 # Firstly, we need to decide whether the missing data is missing at random. For instance, applicants with lower income may not be willing to reveal their income level. 
 ## If the data is missing at random, we could simply remove the missing data sample since we have huge amount of observations. There are 2 types of deletion: listwise, 
 # Listwise deletion (complete-case analysis) removes all data for an observation if there is one or more missing values. For example, in this dataset, most spaces in colomn V43 in blank, so we could delete this column for simplicity. Pairwise deletion analyses all cases in which the variables of interest are present and thus maximizes all data available by an analysis basis.
 # If the data is missing not at random, we could replace missing data with substituted values. For instance, one of the choices is to replace the missing data with the mean of the data we have. Using this method, we could avoid circumstances such as default listwise deletion. 
-<<<<<<< HEAD
-newdata<-ny_hmda_2015[which(ny_hmda_2015$V8 != "" & ny_hmda_2015$V71 != "" ),] 
-omit.ny<- newdata
 
-for(n in c(1:78)){print(sum(is.na(ny_hmda_2015[,n])))}
 ```{r}
-
+hmda = read.csv("ny_hmda_2015.csv")
+hmda$Loan_Approval <- ifelse(hmda$action_taken==1|hmda$action_taken==2|hmda$action_taken==6,1,0)
 ```
 
-missingdata.df <- data.frame(matrix(NA, nrow = 78, ncol = 1))
-for(n in c(1:78)){
-  missingdata.df[n,1] = sum(is.na(hmda[[n]]))
-}
-missingdata.df
+```{r}
+hmda$isMissingIncome <- ifelse(is.na(hmda$applicant_income_000s) == TRUE  ,1,0)
+missingIncome <- xtabs(~isMissingIncome + Loan_Approval,hmda)
+missingIncome
+chisq.test(missingIncome)
+```
 
-5. Provide histograms/density plots for key variables, such as action taken on loan, gender, ethnicity, etc.
+```{r}
+table(hmda$applicant_sex_name)
+table(hmda$applicant_sex)
+hmda$isMissingSex <- ifelse(hmda$applicant_sex == 3,1,0)
+missingSex <-xtabs(~Loan_Approval + isMissingSex,hmda)
+missingSex
+chisq.test(missingSex)
+```
+
+```{r}
+table(hmda$applicant_ethnicity_name)
+table(hmda$applicant_ethnicity)
+hmda$isMissingEthnicity <- ifelse(hmda$applicant_ethnicity == 3,1,0)
+missingEthnicity <-xtabs(~isMissingEthnicity + Loan_Approval,hmda)
+missingEthnicity
+chisq.test(missingEthnicity)
+```
+
+```{r}
+table(hmda$applicant_race_1)
+hmda$isMissingRace <- ifelse(hmda$applicant_race_1 == 6,1,0)
+missingRace<-xtabs(~isMissingRace + Loan_Approval,hmda)
+missingRace
+chisq.test(missingRace)
+```
+
+```{r}
+hmda$applicant_sex_name[which(hmda$applicant_sex_name == "Information not provided by applicant in mail, Internet, or telephone application")] <- "Male"
+hmda$applicant_ethnicity_name[which(hmda$applicant_ethnicity_name == "Information not provided by applicant in mail, Internet, or telephone application")] <- "Not Hispanic or Latino"
+hmda$applicant_race_name_1[which(hmda$applicant_race_name_1 == "Information not provided by applicant in mail, Internet, or telephone application")] <- "White"
+hmda$applicant_income_000s[is.na(hmda$applicant_income_000s)] <- 140.394919
+
+homeMortgage<- hmda
+```
+
+
+Histogram Analysis
 ```{r}
 
 setwd("~/Downloads")
@@ -113,7 +80,6 @@ homeMortgage=ny_hmda_2015[which(ny_hmda_2015[,8] != "NA" & ny_hmda_2015[,71] != 
 omit.ny=homeMortgage
 
 install.packages("tidyverse")
-
 install.packages("rpart")
 install.packages("rpart.plot")
 install.packages("caTools")
@@ -176,7 +142,7 @@ hist(homeMortgage$applicant_income_000s,main="Histogram of income",n=100,xlab="A
 ```
 
 
-6. Create bivariate frequency distributions (tables or plots) for key variables
+Bivariate relationship analysis
 
 ```{r}
 # Bivariate frequency distribution for ethnicity
@@ -201,15 +167,16 @@ homeMortgageEthnicity3 %>%
   coord_flip() + 
   theme_bw()
 ```
-From the graphs, we can see that applicants who are not Hispanic or Latino are more likely (60.0%) to have loan originated than those are Hispanic or Latino (49.9%). Also, applicants who are not Hispanic or Latino have a chance of 18.7% to have their application denied by financial institution, which is less than those who are Hispanic or Latino (24.8%).
+From the graphs, we can see that applicants who are not Hispanic or Latino are more likely (57.7%) to have loan originated than those are Hispanic or Latino (48.8%). Also, applicants who are not Hispanic or Latino have a chance of 19.9% to have their application denied by financial institution, which is less than those who are Hispanic or Latino (25.2%).
 
 ```{r}
-# Bivariate frequency distribution for income
+# Create income level
 homeMortgage$Income.Level="0"
 homeMortgage[homeMortgage$applicant_income_000s<=50,]$Income.Level="Low Income"
 homeMortgage[homeMortgage$applicant_income_000s>50 & homeMortgage$applicant_income_000s<=150,]$Income.Level="Medium Income"
 homeMortgage[homeMortgage$applicant_income_000s>150,]$Income.Level="High Income"
 
+# Bivariate frequency distribution for income
 homeMortgageIncome = homeMortgage %>% 
 group_by(Income.Level) %>%
 summarise(CountOfIncome = n()) 
@@ -232,7 +199,7 @@ homeMortgageIncome3 %>%
   theme_bw()
 ```
 We divide applicants' income into three levels. Applicants whose income is lower than $50,000 are considered as low income people. Medium income applicants have income between $50,000 and $150,000, and high income applicants have income over $150,000.
-From the graphs, we can see that high income applicants are most likely to have loan originated (59.5%),followed by medium income applicants (56.6%), and low income applicants are least likely to have loan originated (50.3%). When it comes to application denied by financial institution, the sequence is inverse, with probability of 14.1%, 17.9% and 29.2% for high, medium and low income applicants respectively. The reason is intuitively straightforward, that higher the income, the more guarantee of paying back loan, and the financial institution is more likely to originate loans with less worries of default.
+From the graphs, we can see that high income applicants are most likely to have loan originated (59.4%), followed by medium income applicants (50.1%), and low income applicants are least likely to have loan originated (49.9%). When it comes to application denied by financial institution, the sequence is inverse, with probability of 14.1%, 16.5% and 29.4% for high, medium and low income applicants respectively. The reason is intuitively straightforward, that higher the income, the more guarantee of paying back loan, and the financial institution is more likely to originate loans with less worries of default.
 
 ```{r}
 # Bivariate frequency distribution for race
@@ -257,7 +224,7 @@ homeMortgageRace3 %>%
   coord_flip() + 
   theme_bw()
 ```
-From the graphs, we can see that applicants who are White are most likely (61.3%) to have loan originated, while those who are American Indian or Alaska Native are least likely (41.3%). Also, applicants who White have the lowest chance of 17.8% to have their application denied by financial institution, while this percentage is 36.4% for those who are American Indian or Alaska Native.
+From the graphs, we can see that applicants who are White are most likely (58.5%) to have loan originated, while those who are American Indian or Alaska Native are least likely (39.1%). Also, applicants who are White or Aisan have the lowest chance of 19.4% to have their application denied by financial institution, while this percentage is 38.5% for those who are American Indian or Alaska Native.
 
 ```{r}
 # Bivariate frequency distribution for gender
@@ -282,7 +249,7 @@ homeMortgageSex3 %>%
   coord_flip() + 
   theme_bw()
 ```
-From the graphs, we can see that gender has slight effects on actions in loans. Male applicants are slightly more likely (59.0%) to have loan originated than female applicants (58.4%). Also, male applicants are less likely to have their application denied by financial institution, with the probability of 18.8%, which is less than female applicants (20.8%).
+From the graphs, we can see that gender has slight effects on actions in loans. Female applicants are slightly more likely (57.3%) to have loan originated than male applicants (57.1%). However, male applicants are less likely to have their application denied by financial institution, with the probability of 19.8%, which is less than female applicants (21.2%).
 
 ```{r}
 # Bivariate frequency distribution for hoepa status
@@ -307,8 +274,7 @@ homeMortgageHoepa3 %>%
   coord_flip() + 
   theme_bw()
 ```
-<<<<<<< HEAD
-From the graphs, we can see that whether a loan is subject to HOEPA has large effects on actions in loans. All of the HOEPA loans are originated, while only 56.0% of non-HOEPA loans are originated, with 19.2% of them denied by financial insititution.
+From the graphs, we can see that whether a loan is subject to HOEPA has large effects on actions in loans. All of the HOEPA loans are originated, while only 51.9% of non-HOEPA loans are originated, with 18.1% of them denied by financial institution.
 
 ```{r}
 # Bivariate frequency distribution for lien status
@@ -333,27 +299,8 @@ homeMortgageLien3 %>%
   coord_flip() + 
   theme_bw()
 ```
-From the graphs, we can see that loans secured by a first lien are most likely to be originated (61.9%),followed by loans secured by a subordinate lien (56.2%), and loans not secured by a lien are least likely to be originated (52.7%). When it comes to application denied by financial institution, the sequence is inverse, with probability of 19.0%, 31.5% and 41.5% for the above three types respectively. 
+From the graphs, we can see that loans secured by a first lien are most likely to be originated (61.1%), followed by loans secured by a subordinate lien (57.5%), and loans not secured by a lien are least likely to be originated (49.9%). When it comes to application denied by financial institution, the sequence is inverse, with probability of 19.1%, 30.3% and 44.4% for the above three types respectively. 
 
-=======
-6. Define a variable “Loan_Approval” based on the action taken on loan. Discuss how you defined this variable.
-unique(newdata$V2)
-table(newdata$V1)
-table(newdata$V2)
-
-
-newdata %>% 
-mutate(Loan_Approval)
-if(newdata$V1==1|newdata$V1==2|newdata$V1==6)
-{Loan_Approval<-1} else{Loan_Approval<-0}
-
-Loan_Approval[newdata$V1==1|newdata$V1==2|newdata$V1==6]<-1
-
-newdata$Loan_Approval <- ifelse(newdata$V1==1|newdata$V1==2|newdata$V1==6,1,0)
-table(newdata$Loan_Approval)
-7. Discuss what the data patterns indicate, and what this could mean for the probability of
-getting a loan approved.
->>>>>>> 5066c748e39290871e6cb96097c9ddcbd309e3e8
 ```{r}
 # Bivariate frequency distribution for loan purpose
 homeMortgageLoanPurpose = homeMortgage %>% 
@@ -377,16 +324,16 @@ homeMortgageLoanPurpose3 %>%
   coord_flip() + 
   theme_bw()
 ```
-From the graphs, we can see that loans used for home purchase are most likely to be originated (63.9%),followed by loans used for home improvement (56.2%), and loans used for refinancing are least likely to be originated (46.5%). When it comes to application denied by financial institution, loans used for home purchase are least likely to be denied (10.9%), followed by purpose of refinancing (25.2%) and home improvement (35.5%).
+From the graphs, we can see that loans used for home purchase are most likely to be originated (58.0%), followed by loans used for home improvement (51.6%), and loans used for refinancing are least likely to be originated (44.3%). When it comes to application denied by financial institution, loans used for home purchase are least likely to be denied (10.1%), followed by purpose of refinancing (23.4%) and home improvement (36.4%).
 
-<<<<<<< HEAD
 ```{r}
-# Bivariate frequency distribution for loan amount
+# Create loan amount level
 homeMortgage$LoanAmount.Level="0"
 homeMortgage[homeMortgage$loan_amount_000s<=100,]$LoanAmount.Level="Low Loan Amount"
 homeMortgage[homeMortgage$loan_amount_000s>100 & homeMortgage$loan_amount_000s<=350,]$LoanAmount.Level="Medium Loan Amount"
 homeMortgage[homeMortgage$loan_amount_000s>350,]$LoanAmount.Level="High Loan Amount"
 
+# Bivariate frequency distribution for loan amount
 homeMortgageLoanAmount = homeMortgage %>% 
 group_by(LoanAmount.Level) %>%
 summarise(CountOfLoanAmount = n()) 
@@ -409,11 +356,11 @@ homeMortgageLoanAmount3 %>%
   theme_bw()
 ```
 We divide loan amount into three levels. Loan amount which is lower than $100,000 are considered as low loan amount. Medium loan amount has a range between $100,000 and $350,000, and high loan amount is over $350,000.
-From the graphs, we can see that medium amount loans are most likely to be originated (56.4%),followed by low amount loans (56.1%), and high amount loans are least likely to be originated (55.4%). When it comes to application denied by financial institution, the probability of being denied is 16.8%, 26.9% and 16.0% for the three types of loans respectively. The results are counterintuitive, and the reason may be that the loan amount that people apply for is correlated with other variables, such as loan purpose and applicant's income. the graphs here only reflect the relationship between actions in loan and loan amount, without taking into control other variables. 
-=======
-8. Discuss the determinants of loan approval with respect to loan amounts, household income, applicant’s gender and race. Clearly state the dependent and independent variables used in your regression analysis. Interpret the findings of this analysis, and note the R-squared.
+From the graphs, we can see that high amount loans are most likely to be originated (52.4%), followed by medium amount loans (51.7%), and low amount loans are least likely to be originated (51.5%). When it comes to application denied by financial institution, the probability of being denied is 14.9%, 26.3% and 15.8% for the three types of loans respectively. The results are counterintuitive, and the reason may be that the loan amount that people apply for is correlated with other variables, such as loan purpose and applicant's income. The graphs here only reflect the relationship between actions in loan and loan amount, without taking into control other variables. 
 
-model1<-glm(newdata$Loan_Approval~newdata$V72+newdata$V71+newdata$V19+newdata$V9,family = binomial(link = "logit"),data = newdata)
-a = newdata$Loan_Approval
-model1<-glm(a~newdata$V72+newdata$V71+newdata$V19+newdata$V9,family = binomial(link = "logit"),data = newdata)
->>>>>>> 5066c748e39290871e6cb96097c9ddcbd309e3e8
+Model Regression
+Original model
+Adjusted model
+
+Conclusion and Recommendation
+
