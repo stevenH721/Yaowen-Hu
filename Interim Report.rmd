@@ -73,12 +73,6 @@ homeMortgage<- hmda
 
 Histogram Analysis
 ```{r}
-
-setwd("~/Downloads")
-ny_hmda_2015=read.csv("ny_hmda_2015.csv")
-homeMortgage=ny_hmda_2015[which(ny_hmda_2015[,8] != "NA" & ny_hmda_2015[,71] != "NA" ),]  
-omit.ny=homeMortgage
-
 install.packages("tidyverse")
 install.packages("rpart")
 install.packages("rpart.plot")
