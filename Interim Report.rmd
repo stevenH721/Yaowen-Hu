@@ -65,7 +65,7 @@ chisq.test(missingRace)
 hmda$applicant_sex_name[which(hmda$applicant_sex_name == "Information not provided by applicant in mail, Internet, or telephone application")] <- "Male"
 hmda$applicant_ethnicity_name[which(hmda$applicant_ethnicity_name == "Information not provided by applicant in mail, Internet, or telephone application")] <- "Not Hispanic or Latino"
 hmda$applicant_race_name_1[which(hmda$applicant_race_name_1 == "Information not provided by applicant in mail, Internet, or telephone application")] <- "White"
-hmda$applicant_income_000s[is.na(hmda$applicant_income_000s)] <- 140.394919
+hmda$applicant_income_000s[is.na(hmda$applicant_income_000s)] <- 93.441091
 
 homeMortgage<- hmda
 ```
@@ -355,6 +355,46 @@ From the graphs, we can see that high amount loans are most likely to be origina
 Model Regression
 Original model
 Adjusted model
+```{r}
+install.packages("rsq")
+model = glm(homeMortgage$Loan_Approval ~ homeMortgage$applicant_income_000s + homeMortgage$loan_amount_000s + factor(homeMortgage$applicant_ethnicity) + factor(homeMortgage$applicant_race_1) + factor(homeMortgage$applicant_sex) + factor(homeMortgage$lien_status) + factor(homeMortgage$loan_purpose) + homeMortgage$applicant_income_000s*factor(homeMortgage$applicant_ethnicity) +  homeMortgage$loan_amount_000s*factor(homeMortgage$loan_purpose),family = binomial(link = "logit"),data = homeMortgage)
+summary(model)
+
+#Calculate adjusted R squared
+rsq::rsq(model,adj=TRUE)
+```
+
+```{r}
+# Divide the dataset into training data and testing data, with 80% and 20% of data respectively
+randOrder=order(runif(nrow(homeMortgage)))
+trainingData=subset(homeMortgage,randOrder<0.8*nrow(homeMortgage))
+testData=subset(homeMortgage,randOrder>=0.8*nrow(homeMortgage))
+
+# Calculate MSE using test data
+mean((testData$Loan_Approval-predict(model,testData))^2)
+```
+This is the final model we choose. We include the interaction between applicant's income and ethnicity, and that between loan amount and loan purpose, because we think applicant's income is correlated with ethnicity, and loan amount is correlated with loan purpose. We also tried to include other interactions, but most of the coefficients are not significant. Also, we first take into account HOEPA status because we originally think it's important. But after we run the regression, we find the coefficient is not siginificant, so we choose to exclude this variable. 
+MSE is 46.58, which is the lowest among all the models that we think are economically reasonable, suggesting that the model predicts well. Adjusted R squared is 13.98%, which is relatively high (although it's not the highest, because we don't include all the variables and interactions).
+From the model, we can see that applicant's income, loan amount, ethnicity, race, gender, lien status and loan purpose all have significant effects on whether a loan can be approved. 
+-applicant_income_000s
+Applicant's income is positively related to loan approval. Keeping other variables constant, when applicant's income increases by $1,000, the log of odds ratio of loan approval will increase by 0.00035.
+-loan_amount_000s
+Loan amount is nagetively related to loan approval. Keeping other variables constant, when loan amount increases by $1,000, the log of odds ratio of loan approval will decrease by 0.00003.
+-applicant_ethnicity
+Applicant ethnicity has a significant effect on loan approval, but the effect is minimal.
+-applicant_race_1
+Applicant race has a significant effect on loan approval. For example, keeping other variables constant, compared with American Indian or Alaska Native, Black or African American will have the log of odds ratio of loan approval that is 0.003 higher.
+-applicant_sex
+The effect of gender on loan approval is not significant, as the coefficient of factor(applicant_sex)2 is not significant.
+-lien_status
+The coefficients of factor(lien_status)2 and factor(lien_status)4 are not significant, and the coefficient of factor(lien_status)3 is significant, but the effect is minimal.
+-loan_purpose
+Loan purpose has a significant effect on loan approval, but the effect is minimal.
+-applicant_income_000s*applicant_ethnicity
+For example, compared with Hispanic or Latino applicants, applicants who are not Hispanic or Latino will make the slope (the effect of applicant's income on the log of odds ratio of loan approval) increase by 0.0005.
+-loan_amount_000s*loan_purpose
+For example, compared with home purchase, loans used for home improvement will make the slope (the effect of loan amount on the log of odds ratio of loan approval) increase by 0.000009, which is quite minimal.
+
 
 Conclusion and Recommendation
 
